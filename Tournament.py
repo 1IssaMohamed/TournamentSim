@@ -27,13 +27,44 @@
 #     teamTrophies (heritage increases total chance of winning)
 
 
+
+#match(t1,t2,date,stadium,ref):
+
+
+#first draft will be doen without any scraping to get information on win %s etc.
 class Tournament:
-    def __init__(self,numOfPlayers,teamName,teamRating):
-        pass
+    def __init__(self,tourneyName,gender,tourneyLocation,numTeams):
+        self.tourneyName=tourneyName
+        self.gender=gender
+        self.tourneyLocation=tourneyLocation
+        teams=[]
+        for x in range(numTeams):
+            country=input("Country:",country)
+            manager=input("Manager:",manager)
+            kit=input("Home or Away kit?",kit)
+            ranking=input("Fifa ranking?",ranking)
+            teams.append(Team(country, manager, kit, ranking))
 
 class Team:
-    def __init__():
-        pass
+    def __init__(self,country,manager,kit,ranking):
+        self.coutnry=country
+        self.manager=manager
+        self.kit=kit
+        self.ranking=ranking
 
+class Match:
+    def __init__(t1,t2,ref):
+
+class Group:
+    def __init__(teamsmn,g):
+
+
+
+#Addons:Single elimination vs placement type tourney
 class main:
-    
+    print("welcome to the football tournament sim!")
+    name=input("Would you like to simulate the Euros or Copa America?")
+    gender=input("What gender is your tourney meant for?")
+    location=input("Which country is your tourney played at?")
+    numTeams=input("How many teams will your tournament host?")
+    sim=Tournament(name,  gender,location,numTeams)
