@@ -27,13 +27,79 @@
 #     teamTrophies (heritage increases total chance of winning)
 
 
+#ok lost most of my data at home cause Ithought I comitted my work corectly but guess not? 
+import random
 class Tournament:
-    def __init__(self,numOfPlayers,teamName,teamRating):
-        pass
+    def __init__(self,teams):
+        self.teams=teams
+
+    def simulateRound(self,teams):
+        numOfGames=len(teams)/2
+        self.teams=random.shuffle(self.teams)
+        nextRound=[]
+        for x in range(numOfGames):
+            #temporary location that has to change
+            match=Match(self.teams.pop(),self.teams.pop(),"Zimbabwe","June 1, 2052")
+            nextRound.append(match.singleResult(match.t1,match.t2))
+        self.teams=nextRound
+        return self.teams
+    
+    def simulateKnockout(self,teams):
+        while len(self.teams)>1:
+            print("round of ",len(self.teams))
+            Tournament.simulateRound(self.teams)
+        return teams
+
 
 class Team:
-    def __init__():
-        pass
-
-class main:
+    #other aspects that could go here are team age, t10 coach, last placement
+    def __init__(self, nation, rating,heritage):
+        self.nation=nation
+        self.heritage=heritage
+        if heritage>=3:
+            self.rating=(rating*.25)+rating
+        else:
+            self.rating=rating
+        
+        
+        
+#for euros location will be a randomly chosen european country and you get a boost if you are form that place
+#for copa it will be the same, Ill prolly get the list from chat gpt inorder to randomize
+#could also add ref later and see the referees history with each of the nations, possibly scraping through a data base 
+class Match:
+    def __init__(self,t1,t2,location, date):
+        self.team1=t1
+        self.team2=t2
+        self.location=location
+        if t1.nation==location:
+            t1.rating=(t1.rating*.25)+t1.rating
+        if t2.nation==location:
+            t2.rating=(t2.rating*.25)+t2.rating
+        self.date=date
     
+    def singleResult(self,t1,t2): 
+        totRange=t1.rating+t2.rating
+        result=random.randint(t1.rating,totRange)
+        if result<=t1.rating:
+            print(f"{t1.nation} wins!")
+            return t1
+        else:
+            print(f"{t2.nation} wins!")
+            return t2
+
+
+
+totalteams=[]
+t=input("Welcome to the international tournament simulator, would you liek to simulate\n1.euros\n2.copa america?")
+teams=input("how many teams would you like in this tournament\n1.8\n2.16\n3.32")
+#create 2 gloabal lists for the countries in south and north america and for the countries in europe
+for x in range(teams):
+    #check if not in country list 
+    n=input("What nation?")
+    #make sure valid input
+    r=input("what is the current team ranking 1-100")
+    h=input("How many major trophies has your nation won in its history?")
+    totalteams.append(Team(n,r,h))
+
+sim= Tournament(totalteams)
+print("and the champion isssss!!!!!",sim.simulateKnockout(teams))
