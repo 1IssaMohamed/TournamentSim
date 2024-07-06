@@ -27,44 +27,79 @@
 #     teamTrophies (heritage increases total chance of winning)
 
 
-
-#match(t1,t2,date,stadium,ref):
-
-
-#first draft will be doen without any scraping to get information on win %s etc.
+#ok lost most of my data at home cause Ithought I comitted my work corectly but guess not? 
+import random
 class Tournament:
-    def __init__(self,tourneyName,gender,tourneyLocation,numTeams):
-        self.tourneyName=tourneyName
-        self.gender=gender
-        self.tourneyLocation=tourneyLocation
-        teams=[]
-        for x in range(numTeams):
-            country=input("Country:",country)
-            manager=input("Manager:",manager)
-            kit=input("Home or Away kit?",kit)
-            ranking=input("Fifa ranking?",ranking)
-            teams.append(Team(country, manager, kit, ranking))
+    def __init__(self,teams):
+        self.teams=teams
+
+    def simulateRound(self,teams):
+        numOfGames=len(teams)/2
+        self.teams=random.shuffle(self.teams)
+        nextRound=[]
+        for x in range(numOfGames):
+            #temporary location that has to change
+            match=Match(self.teams.pop(),self.teams.pop(),"Zimbabwe","June 1, 2052")
+            nextRound.append(match.singleResult(match.t1,match.t2))
+        self.teams=nextRound
+        return self.teams
+    
+    def simulateKnockout(self,teams):
+        while len(self.teams)>1:
+            print("round of ",len(self.teams))
+            Tournament.simulateRound(self.teams)
+        return teams
+
 
 class Team:
-    def __init__(self,country,manager,kit,ranking):
-        self.coutnry=country
-        self.manager=manager
-        self.kit=kit
-        self.ranking=ranking
-
+    #other aspects that could go here are team age, t10 coach, last placement
+    def __init__(self, nation, rating,heritage):
+        self.nation=nation
+        self.heritage=heritage
+        if heritage>=3:
+            self.rating=(rating*.25)+rating
+        else:
+            self.rating=rating
+        
+        
+        
+#for euros location will be a randomly chosen european country and you get a boost if you are form that place
+#for copa it will be the same, Ill prolly get the list from chat gpt inorder to randomize
+#could also add ref later and see the referees history with each of the nations, possibly scraping through a data base 
 class Match:
-    def __init__(t1,t2,ref):
+    def __init__(self,t1,t2,location, date):
+        self.team1=t1
+        self.team2=t2
+        self.location=location
+        if t1.nation==location:
+            t1.rating=(t1.rating*.25)+t1.rating
+        if t2.nation==location:
+            t2.rating=(t2.rating*.25)+t2.rating
+        self.date=date
+    
+    def singleResult(self,t1,t2): 
+        totRange=t1.rating+t2.rating
+        result=random.randint(t1.rating,totRange)
+        if result<=t1.rating:
+            print(f"{t1.nation} wins!")
+            return t1
+        else:
+            print(f"{t2.nation} wins!")
+            return t2
 
-class Group:
-    def __init__(teamsmn,g):
 
 
+totalteams=[]
+t=input("Welcome to the international tournament simulator, would you liek to simulate\n1.euros\n2.copa america?")
+teams=input("how many teams would you like in this tournament\n1.8\n2.16\n3.32")
+#create 2 gloabal lists for the countries in south and north america and for the countries in europe
+for x in range(teams):
+    #check if not in country list 
+    n=input("What nation?")
+    #make sure valid input
+    r=input("what is the current team ranking 1-100")
+    h=input("How many major trophies has your nation won in its history?")
+    totalteams.append(Team(n,r,h))
 
-#Addons:Single elimination vs placement type tourney
-class main:
-    print("welcome to the football tournament sim!")
-    name=input("Would you like to simulate the Euros or Copa America?")
-    gender=input("What gender is your tourney meant for?")
-    location=input("Which country is your tourney played at?")
-    numTeams=input("How many teams will your tournament host?")
-    sim=Tournament(name,  gender,location,numTeams)
+sim= Tournament(totalteams)
+print("and the champion isssss!!!!!",sim.simulateKnockout(teams))
