@@ -29,26 +29,37 @@
 
 #ok lost most of my data at home cause Ithought I comitted my work corectly but guess not? 
 import random
+
 class Tournament:
     def __init__(self,teams):
         self.teams=teams
 
     def simulateRound(self,teams):
-        numOfGames=len(teams)/2
-        self.teams=random.shuffle(self.teams)
+        numOfGames=int(len(self.teams)/2)
+        print(f"pre,{self.teams}")
+        random.shuffle(self.teams)
+        print(f"post,{self.teams}")
         nextRound=[]
         for x in range(numOfGames):
+            print(f"Game #{x},current next round:{nextRound}")
             #temporary location that has to change
-            match=Match(self.teams.pop(),self.teams.pop(),"Zimbabwe","June 1, 2052")
-            nextRound.append(match.singleResult(match.t1,match.t2))
+            #popping the 2 teams that will be playing each other out
+            a=self.teams.pop()
+            b=self.teams.pop()
+            print(a.nation,b.nation)
+            match=Match(a,b,"Zimbabwe","June 1, 2052")
+            nextRound.append(match.singleResult(match.team1,match.team2))
         self.teams=nextRound
+        print(f"ROUND COMPLETE!, here are the survivors {self.teams}")
         return self.teams
     
     def simulateKnockout(self,teams):
         while len(self.teams)>1:
-            print("round of ",len(self.teams))
-            Tournament.simulateRound(self.teams)
-        return teams
+            print(f"round of {len(self.teams)} current squad is:")
+            for x in self.teams:
+                print(x.nation)
+            self.simulateRound(self.teams)
+        return self.teams[0]
 
 
 class Team:
@@ -60,7 +71,12 @@ class Team:
             self.rating=(rating*.25)+rating
         else:
             self.rating=rating
-        
+    def getNation(self):
+        return self.nation
+    def getHeritage(self):
+        return self.heritage
+    def getRating(self):
+        return self.heritage
         
         
 #for euros location will be a randomly chosen european country and you get a boost if you are form that place
@@ -71,35 +87,56 @@ class Match:
         self.team1=t1
         self.team2=t2
         self.location=location
-        if t1.nation==location:
-            t1.rating=(t1.rating*.25)+t1.rating
-        if t2.nation==location:
-            t2.rating=(t2.rating*.25)+t2.rating
+        if self.team1.nation==location:
+            self.team1.rating=(self.team1.rating*.25)+self.team1.rating
+        if self.team2.nation==location:
+            self.team2.rating=(self.team2.rating*.25)+self.team2.rating
         self.date=date
     
     def singleResult(self,t1,t2): 
-        totRange=t1.rating+t2.rating
-        result=random.randint(t1.rating,totRange)
-        if result<=t1.rating:
-            print(f"{t1.nation} wins!")
-            return t1
+        totRange=self.team1.rating+self.team2.rating
+        print(self.team1.rating,self.team2.rating,totRange)
+        result=int(random.randint(int(self.team1.rating),int(totRange)))
+        print(result)
+        if result<=self.team1.rating:
+            print(f"{self.team1.nation} wins!")
+            return self.team1
         else:
             print(f"{t2.nation} wins!")
-            return t2
+            return self.team2
 
 
 
 totalteams=[]
-t=input("Welcome to the international tournament simulator, would you liek to simulate\n1.euros\n2.copa america?")
-teams=input("how many teams would you like in this tournament\n1.8\n2.16\n3.32")
+t=int(input("Welcome to the international tournament simulator, would you liek to simulate\n1.euros\n2.copa america?"))
+numOfTeams=int(input("how many teams would you like in this tournament\n1.8\n2.16\n3.32"))
+if numOfTeams==1:
+    numOfTeams=8
+elif numOfTeams==2:
+    numOfTeams=16
+elif numOfTeams==32:
+    numOfTeams=32
+else:
+    print("invalid input")
 #create 2 gloabal lists for the countries in south and north america and for the countries in europe
-for x in range(teams):
+rankingSeen=[]
+nationsSeen=[]
+for x in range(numOfTeams):
     #check if not in country list 
-    n=input("What nation?")
+    n=input(f"Nation #{x+1}?")
+    while n in nationsSeen:
+        n= int(input("The same team cant get placed 2 times in the same tournament!\n, retry"))
+    nationsSeen.append(n)
     #make sure valid input
-    r=input("what is the current team ranking 1-100")
-    h=input("How many major trophies has your nation won in its history?")
+    r=int(input("what is the current team ranking 1-211"))
+    while r in rankingSeen:
+        r= int(input("2 teams cant have the same ranking!\n, retry"))
+    rankingSeen.append(r)
+    r=(211-r)
+    h=int(input("How many major trophies has your nation won in its history?"))
+
+    
     totalteams.append(Team(n,r,h))
 
 sim= Tournament(totalteams)
-print("and the champion isssss!!!!!",sim.simulateKnockout(teams))
+print("and the champion isssss!!!!!",sim.simulateKnockout(totalteams).nation)
