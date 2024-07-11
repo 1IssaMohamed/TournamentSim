@@ -90,15 +90,23 @@ class Match:
 
 
 totalteams=[]
-t=input("Welcome to the international tournament simulator, would you liek to simulate\n1.euros\n2.copa america?")
-teams=input("how many teams would you like in this tournament\n1.8\n2.16\n3.32")
+CorE=int(input("Welcome to the international tournament simulator, would you liek to simulate\n1.euros\n2.copa america?"))
+t2=int(input("how many teams would you like in this tournament\n1.8\n2.16\n3.32\n"))
+if t2 ==1 :
+    numOfTeams=8
+elif t2 == 2:
+    numOfTeams=16
+elif t2 == 3:
+    numOfTeams=32
+else:
+    print("error!")
 #create 2 gloabal lists for the countries in south and north america and for the countries in europe
-for x in range(teams):
+for x in range(numOfTeams):
     #check if not in country list 
-    n=input("What nation?")
+    n=input(f"Nation #{x+1}?")
     #make sure valid input
-    r=input("what is the current team ranking 1-100")
-    h=input("How many major trophies has your nation won in its history?")
+    r=int(input("what is the current team ranking 1-100\n"))
+    h=int(input("How many major trophies has your nation won in its history?\n"))
     totalteams.append(Team(n,r,h))
 
 sim= Tournament(totalteams)
