@@ -102,10 +102,141 @@ class Match:
             print(f"{self.team1.nation} wins!")
             return self.team1
         else:
-            print(f"{t2.nation} wins!")
+            print(f"{self.team2.nation} wins!")
             return self.team2
 
 
+#requests
+import requests
+from bs4 import BeautifulSoup
+testingName=input("yo whats your team name")
+realTeamName=testingName.lower().replace(' ','-')
+
+copateamids={
+'united-states': 3505,
+'mexico': 6303,
+'canada': 2316,
+'costa-rica': 4563,
+'honduras': 4564,
+'el-salvador': 4565,
+'jamaica': 3671,
+'panama': 4567,
+'trinidad-and-tobago': 4568,
+'guatemala': 4569,
+'haiti': 4570,
+'nicaragua': 4571,
+'cuba': 4572,
+'suriname': 7936,
+'curaçao': 7717,
+'antigua-and-barbuda': 4574,
+'saint-kitts-and-nevis': 4575,
+'grenada': 4576,
+'saint-vincent-and-the-grenadines': 4577,
+'saint-lucia': 4578,
+'dominica': 4579,
+'barbados': 4580,
+'belize': 4581,
+'bermuda': 4582,
+'guyana': 4583,
+'montserrat': 4584,
+'bahamas': 4585,
+'aruba': 7632,
+'cayman-islands': 4586,
+'turks-and-caicos-islands': 4587,
+'british-virgin-islands': 4588,
+'us-virgin-islands': 4589,
+'anguilla': 4590,
+'brazil': 3439,
+'argentina': 3437,
+'uruguay': 3449,
+'colombia': 3442,
+'chile': 3440,
+'peru': 3436,
+'venezuela': 3448,
+'paraguay': 3447,
+'ecuador': 3441,
+'bolivia': 3437,
+}
+
+euroteamids={
+'albania': 3502,
+'andorra': 6168,
+'armenia': 3814,
+'austria': 3388,
+'azerbaijan': 3815,
+'belarus': 3816,
+'belgium': 3382,
+'bosnia-herzegovina': 3501,
+'bulgaria': 3389,
+'croatia': 3556,
+'cyprus': 5594,
+'czech-republic': 3445,
+'denmark': 3434,
+'england': 3299,
+'estonia': 5783,
+'faroe-islands': 6088,
+'finland': 3570,
+'france': 3377,
+'georgia': 3833,
+'germany': 3262,
+'gibraltar': 16154,
+'greece': 3379,
+'hungary': 3698,
+'iceland': 6714,
+'ireland': 3515,
+'italy': 3376,
+'kazakhstan': 3838,
+'kosovo': 15488,
+'latvia': 3821,
+'liechtenstein': 3817,
+'lithuania': 3834,
+'luxembourg': 3845,
+'malta': 3853,
+'moldova': 3832,
+'monaco': 16223,
+'montenegro': 10750,
+'netherlands': 3378,
+'north-macedonia': 3557,
+'norway': 3516,
+'poland': 3444,
+'portugal': 3300,
+'romania': 3446,
+'russia': 3443,
+'san-marino': 3836,
+'scotland': 3708,
+'serbia': 3435,
+'slovakia': 3803,
+'slovenia': 3671,
+'spain': 3375,
+'sweden': 3554,
+'switzerland': 3555,
+'turkey': 3433,
+'ukraine': 3707,
+'wales': 3575,
+}
+id=euroteamids.get(realTeamName)
+searchingUrl=f"https://www.transfermarkt.us/{realTeamName}/legionaere/verein/{id}"
+# url = "https://www.transfermarkt.us/wettbewerbe/fifa"
+# headers = {
+#     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    
+# }
+
+# response = requests.get(url, headers=headers)
+
+# if response.status_code == 200:
+#     print("Request successful!")
+#     html_content=response.content  # or response.text for a human-readable format
+# else:
+#     print(f"Error: {response.status_code}")
+# print(html_content)
+# soup = BeautifulSoup(html_content, 'html.parser')
+
+# # Example: Scraping team names
+# team_names = soup.find_all('td', class_='hauptlink')
+
+# for team in team_names:
+#     print(team.text.strip())
 figlet = pyfiglet.Figlet(font='slant')
 print(colored(figlet.renderText("Welcome to Euro/Copa Tournament simulator!"),"red",on_color="on_black",attrs=["bold"]))
 totalteams=[]
