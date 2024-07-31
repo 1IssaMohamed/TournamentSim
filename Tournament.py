@@ -108,114 +108,179 @@ class Match:
 
 #requests
 import requests
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
-testingName=input("yo whats your team name")
-realTeamName=testingName.lower().replace(' ','-')
+import time
 
-copateamids={
-'united-states': 3505,
-'mexico': 6303,
-'canada': 2316,
-'costa-rica': 4563,
-'honduras': 4564,
-'el-salvador': 4565,
-'jamaica': 3671,
-'panama': 4567,
-'trinidad-and-tobago': 4568,
-'guatemala': 4569,
-'haiti': 4570,
-'nicaragua': 4571,
-'cuba': 4572,
-'suriname': 7936,
-'curaçao': 7717,
-'antigua-and-barbuda': 4574,
-'saint-kitts-and-nevis': 4575,
-'grenada': 4576,
-'saint-vincent-and-the-grenadines': 4577,
-'saint-lucia': 4578,
-'dominica': 4579,
-'barbados': 4580,
-'belize': 4581,
-'bermuda': 4582,
-'guyana': 4583,
-'montserrat': 4584,
-'bahamas': 4585,
-'aruba': 7632,
-'cayman-islands': 4586,
-'turks-and-caicos-islands': 4587,
-'british-virgin-islands': 4588,
-'us-virgin-islands': 4589,
-'anguilla': 4590,
-'brazil': 3439,
-'argentina': 3437,
-'uruguay': 3449,
-'colombia': 3442,
-'chile': 3440,
-'peru': 3436,
-'venezuela': 3448,
-'paraguay': 3447,
-'ecuador': 3441,
-'bolivia': 3437,
-}
+# Set up the Selenium WebDriver (make sure you have the correct driver installed for your browser)
+driver = webdriver.Firefox()  # Or another browser driver like Firefox, Edge, etc.
 
-euroteamids={
-'albania': 3502,
-'andorra': 6168,
-'armenia': 3814,
-'austria': 3388,
-'azerbaijan': 3815,
-'belarus': 3816,
-'belgium': 3382,
-'bosnia-herzegovina': 3501,
-'bulgaria': 3389,
-'croatia': 3556,
-'cyprus': 5594,
-'czech-republic': 3445,
-'denmark': 3434,
-'england': 3299,
-'estonia': 5783,
-'faroe-islands': 6088,
-'finland': 3570,
-'france': 3377,
-'georgia': 3833,
-'germany': 3262,
-'gibraltar': 16154,
-'greece': 3379,
-'hungary': 3698,
-'iceland': 6714,
-'ireland': 3515,
-'italy': 3376,
-'kazakhstan': 3838,
-'kosovo': 15488,
-'latvia': 3821,
-'liechtenstein': 3817,
-'lithuania': 3834,
-'luxembourg': 3845,
-'malta': 3853,
-'moldova': 3832,
-'monaco': 16223,
-'montenegro': 10750,
-'netherlands': 3378,
-'north-macedonia': 3557,
-'norway': 3516,
-'poland': 3444,
-'portugal': 3300,
-'romania': 3446,
-'russia': 3443,
-'san-marino': 3836,
-'scotland': 3708,
-'serbia': 3435,
-'slovakia': 3803,
-'slovenia': 3671,
-'spain': 3375,
-'sweden': 3554,
-'switzerland': 3555,
-'turkey': 3433,
-'ukraine': 3707,
-'wales': 3575,
-}
-id=euroteamids.get(realTeamName)
-searchingUrl=f"https://www.transfermarkt.us/{realTeamName}/legionaere/verein/{id}"
+# Navigate to the webpage
+driver.get("https://fbref.com/en/squads/f9fddd6e/Argentina-Men-Stats#all_stats_standard")
+
+# Optionally wait for the page to load completely
+time.sleep(5)  # Adjust this if necessary
+
+# Get the page source after JavaScript has loaded
+page_source = driver.page_source
+
+# Parse the page source with BeautifulSoup
+soup = BeautifulSoup(page_source, 'html.parser')
+
+# Locate the specific row with data-row="26"
+row = soup.find('tr', attrs={'data-row': '26'})
+print(row.text)
+if row:
+    data = [td.get_text(strip=True) for td in row.find_all('td')]
+    print("\t".join(data))
+    for x in data:
+        print(x)
+    age_element = row.find('td', class_='center ', attrs={'data-stat': 'age'})
+    if age_element:
+        print(age_element.text.strip())
+    else:
+        print("Age data not found in the specified row.")
+else:
+    print("Row with data-row='26' not found.")
+
+# Close the browser
+driver.quit()
+
+
+# copateamids={
+# 'united-states': 3505,
+# 'mexico': 6303,
+# 'canada': 2316,
+# 'costa-rica': 4563,
+# 'honduras': 4564,
+# 'el-salvador': 4565,
+# 'jamaica': 3671,
+# 'panama': 4567,
+# 'trinidad-and-tobago': 4568,
+# 'guatemala': 4569,
+# 'haiti': 4570,
+# 'nicaragua': 4571,
+# 'cuba': 4572,
+# 'suriname': 7936,
+# 'curaçao': 7717,
+# 'antigua-and-barbuda': 4574,
+# 'saint-kitts-and-nevis': 4575,
+# 'grenada': 4576,
+# 'saint-vincent-and-the-grenadines': 4577,
+# 'saint-lucia': 4578,
+# 'dominica': 4579,
+# 'barbados': 4580,
+# 'belize': 4581,
+# 'bermuda': 4582,
+# 'guyana': 4583,
+# 'montserrat': 4584,
+# 'bahamas': 4585,
+# 'aruba': 7632,
+# 'cayman-islands': 4586,
+# 'turks-and-caicos-islands': 4587,
+# 'british-virgin-islands': 4588,
+# 'us-virgin-islands': 4589,
+# 'anguilla': 4590,
+# 'brazil': 3439,
+# 'argentina': 3437,
+# 'uruguay': 3449,
+# 'colombia': 3442,
+# 'chile': 3440,
+# 'peru': 3436,
+# 'venezuela': 3448,
+# 'paraguay': 3447,
+# 'ecuador': 3441,
+# 'bolivia': 3437,
+# }
+
+# euroTeamIds={
+# 'albania': 3502,
+# 'andorra': 6168,
+# 'armenia': 3814,
+# 'austria': 3388,
+# 'azerbaijan': 3815,
+# 'belarus': 3816,
+# 'belgium': 3382,
+# 'bosnia-herzegovina': 3501,
+# 'bulgaria': 3389,
+# 'croatia': 3556,
+# 'cyprus': 5594,
+# 'czech-republic': 3445,
+# 'denmark': 3434,
+# 'england': 3299,
+# 'estonia': 5783,
+# 'faroe-islands': 6088,
+# 'finland': 3570,
+# 'france': 3377,
+# 'georgia': 3833,
+# 'germany': 3262,
+# 'gibraltar': 16154,
+# 'greece': 3379,
+# 'hungary': 3698,
+# 'iceland': 6714,
+# 'ireland': 3515,
+# 'italy': 3376,
+# 'kazakhstan': 3838,
+# 'kosovo': 15488,
+# 'latvia': 3821,
+# 'liechtenstein': 3817,
+# 'lithuania': 3834,
+# 'luxembourg': 3845,
+# 'malta': 3853,
+# 'moldova': 3832,
+# 'monaco': 16223,
+# 'montenegro': 10750,
+# 'netherlands': 3378,
+# 'north-macedonia': 3557,
+# 'norway': 3516,
+# 'poland': 3444,
+# 'portugal': 3300,
+# 'romania': 3446,
+# 'russia': 3443,
+# 'san-marino': 3836,
+# 'scotland': 3708,
+# 'serbia': 3435,
+# 'slovakia': 3803,
+# 'slovenia': 3671,
+# 'spain': 3375,
+# 'sweden': 3554,
+# 'switzerland': 3555,
+# 'turkey': 3433,
+# 'ukraine': 3707,
+# 'wales': 3575,
+# }
+# id=euroTeamIds.get(realTeamName)
+# searchingUrl=f"https://www.transfermarkt.us/{realTeamName}/legionaere/verein/{id}"
+# headers = {
+#     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    
+# }
+# response=requests.get(searchingUrl,headers=headers)
+# response.raise_for_status()
+# # print("content:",response.content)
+# soup = BeautifulSoup(response.content, 'html.parser')
+# print(soup)
+# ranking_element = soup.find(class_='team_ranking_class')
+# if ranking_element:
+#     ranking = ranking_element.text.strip()
+#     print(f"Team Ranking: {ranking}")
+# else:
+#     print("DNE!")
+
+# market_value = soup.find(class_='market_value_class')
+# if market_value:
+#     market_value = market_value.text.strip()
+# else:
+#     print("DNE!!")
+# print(f"{realTeamName} market value:{market_value}")
+# trophy_count = soup.find(id='trophy_count_id')
+# if trophy_count:
+#     trophy_count = trophy_count.text.strip()
+# else:
+#     print("DNE!!!")
+
+
 # url = "https://www.transfermarkt.us/wettbewerbe/fifa"
 # headers = {
 #     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
