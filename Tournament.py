@@ -113,41 +113,114 @@ from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 import time
 
+
+copateamids={
+    'argentina':'f9fddd6e',
+    'Bolivia':0,
+    'Brazil':0,
+    'chile':0,
+    'colombia':0,
+    'ecuador':0,
+    'Paraguay':0,
+    'peru':0,
+    'urugay':0,
+    'venezula':0,
+    'Canada':0,
+    'Costa-Rica':0,
+    'Haitit':0,
+    "honduras":0,
+    'Jamaica':0,
+    'Mexico':0,
+    'Panama':0,
+    'Uniuted-States':0
+    }
+copashortIds={
+    'Argentina':'ARG',
+    'Bolivia':0,
+    'Brazil':0,
+    'chile':0,
+    'colombia':0,
+    'ecuador':0,
+    'Paraguay':0,
+    'peru':0,
+    'urugay':0,
+    'venezula':0,
+    'Canada':0,
+    'Costa-Rica':0,
+    'Haitit':0,
+    "honduras":0,
+    'Jamaica':0,
+    'Mexico':0,
+    'Panama':0,
+    'Uniuted-States':0
+}
+t1=input("what is team 1?")
+t2=input("What is team 2?")
+id1=copateamids.get(t1)
+id2=copashortIds.get(t1)
+url=f"https://fbref.com/en/squads/{id1}/{t1}-Men-Stats#all_stats_standard"
+url2=f"https://inside.fifa.com/fifa-world-ranking/{id2}?gender=men"
+url3=f"https://www.11v11.com/teams/{t1.lower()}/"
+print(url3)
 # Set up the Selenium WebDriver (make sure you have the correct driver installed for your browser)
-driver = webdriver.Firefox()  # Or another browser driver like Firefox, Edge, etc.
+# driver = webdriver.Firefox()  # Or another browser driver like Firefox, Edge, etc.
 
 # Navigate to the webpage
-driver.get("https://fbref.com/en/squads/f9fddd6e/Argentina-Men-Stats#all_stats_standard")
+# driver.get(url)
 
 # Optionally wait for the page to load completely
-time.sleep(5)  # Adjust this if necessary
+# time.sleep(5)  # Adjust this if necessary
 
 # Get the page source after JavaScript has loaded
-page_source = driver.page_source
+# page_source = driver.page_source
 
 # Parse the page source with BeautifulSoup
-soup = BeautifulSoup(page_source, 'html.parser')
-
-# Locate the specific row with data-row="26"
-row = soup.find('tr', attrs={'data-row': '26'})
-print(row.text)
-if row:
-    data = [td.get_text(strip=True) for td in row.find_all('td')]
-    print("\t".join(data))
-    for x in data:
-        print(x)
-    age_element = row.find('td', class_='center ', attrs={'data-stat': 'age'})
-    if age_element:
-        print(age_element.text.strip())
-    else:
-        print("Age data not found in the specified row.")
-else:
-    print("Row with data-row='26' not found.")
-
-# Close the browser
-driver.quit()
+# soup = BeautifulSoup(page_source, 'html.parser')
 
 
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    
+}
+# response=requests.get(url2,headers=headers)
+# response.raise_for_status()
+# # print("content:",response.content)
+# soup2 = BeautifulSoup(response.content, 'html.parser')
+# # print(soup2)
+# ranking_element = soup2.find('div',class_="highlights_resultItemValue__okL7z")
+# rank=ranking_element.find('span')
+# print(rank.text[0])
+
+response2=requests.get("https://www.11v11.com/teams/argentina/",headers)
+# response2.raise_for_status()
+print(response2.content)
+soup3=BeautifulSoup(response2.content, 'html.parser')
+games_won = soup3.find('td', text='Games won:').find_next_sibling('td').text
+games_drawn = soup3.find('td', text='Games drawn:').find_next_sibling('td').text
+games_lost = soup3.find('td', text='Games lost:').find_next_sibling('td').text
+
+# # Locate the specific row with data-row="26"
+# row = soup.find('tr', attrs={'data-row': '26'})
+# print(row.text)
+# if row:
+#     data = [td.get_text(strip=True) for td in row.find_all('td')]
+#     print("\t".join(data))
+#     for x in data:
+#         print(x)
+#     age_element = row.find('td', class_='center ', attrs={'data-stat': 'age'})
+#     if age_element:
+#         print(age_element.text.strip())
+#     else:
+#         print("Age data not found in the specified row.")
+# else:
+#     print("Row with data-row='26' not found.")
+
+# # Close the browser
+# driver.quit()
+
+euroTeamIds={
+
+}
 # copateamids={
 # 'united-states': 3505,
 # 'mexico': 6303,
