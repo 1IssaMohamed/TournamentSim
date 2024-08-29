@@ -112,10 +112,10 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 import time
-
+from playwright.sync_api import sync_playwright
 
 copateamids={
-    'argentina':'f9fddd6e',
+    'argentina':['f9fddd6e','ARG'],
     'Bolivia':0,
     'Brazil':0,
     'chile':0,
@@ -134,92 +134,78 @@ copateamids={
     'Panama':0,
     'Uniuted-States':0
     }
-copashortIds={
-    'Argentina':'ARG',
-    'Bolivia':0,
-    'Brazil':0,
-    'chile':0,
-    'colombia':0,
-    'ecuador':0,
-    'Paraguay':0,
-    'peru':0,
-    'urugay':0,
-    'venezula':0,
-    'Canada':0,
-    'Costa-Rica':0,
-    'Haitit':0,
-    "honduras":0,
-    'Jamaica':0,
-    'Mexico':0,
-    'Panama':0,
-    'Uniuted-States':0
-}
 t1=input("what is team 1?")
 t2=input("What is team 2?")
-id1=copateamids.get(t1)
-id2=copashortIds.get(t1)
+id1=(copateamids.get(t1))
+id1=id1[0]
+id2=(copateamids.get(t1))[1]
 url=f"https://fbref.com/en/squads/{id1}/{t1}-Men-Stats#all_stats_standard"
 url2=f"https://inside.fifa.com/fifa-world-ranking/{id2}?gender=men"
 url3=f"https://www.11v11.com/teams/{t1.lower()}/"
-print(url3)
-# Set up the Selenium WebDriver (make sure you have the correct driver installed for your browser)
-# driver = webdriver.Firefox()  # Or another browser driver like Firefox, Edge, etc.
-
-# Navigate to the webpage
-# driver.get(url)
-
-# Optionally wait for the page to load completely
-# time.sleep(5)  # Adjust this if necessary
-
-# Get the page source after JavaScript has loaded
-# page_source = driver.page_source
-
-# Parse the page source with BeautifulSoup
-# soup = BeautifulSoup(page_source, 'html.parser')
-
-
-headers = {
+header2 = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-    
 }
-# response=requests.get(url2,headers=headers)
-# response.raise_for_status()
-# # print("content:",response.content)
-# soup2 = BeautifulSoup(response.content, 'html.parser')
-# # print(soup2)
-# ranking_element = soup2.find('div',class_="highlights_resultItemValue__okL7z")
-# rank=ranking_element.find('span')
-# print(rank.text[0])
+header3={
+    'User-Agent':"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0" ,
+    "Referer": "https://www.11v11.com/teams/argentina/"
+}
+#The main difference between using requests  vs Selenium is the fact tha selenium can actually process js 
+#I believe this page dosen work with requests because although it automatically opens up with the infomration necessaary
+#if I go to the webpage, clicking a button compeltely changes the page (which Id assume is odne thorugh js)
 
-response2=requests.get("https://www.11v11.com/teams/argentina/",headers)
-# response2.raise_for_status()
-print(response2.content)
-soup3=BeautifulSoup(response2.content, 'html.parser')
-games_won = soup3.find('td', text='Games won:').find_next_sibling('td').text
-games_drawn = soup3.find('td', text='Games drawn:').find_next_sibling('td').text
-games_lost = soup3.find('td', text='Games lost:').find_next_sibling('td').text
-
+# #first batch of information (xG,xAG,xProgressiveCarries,xProgressivePasses (all per 90))
+# driver = webdriver.Firefox() 
+# driver.get(url)
+# #wait for complete load
+# time.sleep(5)
+# page_source = driver.page_source
+# soup = BeautifulSoup(page_source, 'html.parser')
 # # Locate the specific row with data-row="26"
 # row = soup.find('tr', attrs={'data-row': '26'})
-# print(row.text)
 # if row:
 #     data = [td.get_text(strip=True) for td in row.find_all('td')]
-#     print("\t".join(data))
-#     for x in data:
-#         print(x)
-#     age_element = row.find('td', class_='center ', attrs={'data-stat': 'age'})
-#     if age_element:
-#         print(age_element.text.strip())
-#     else:
-#         print("Age data not found in the specified row.")
+#     xGP90=data[26]
+#     xAGP90=data[27]
+#     xPrgCP90=data[18]
+#     xPrgPP90=data[19]
+#     print(xGP90,xAGP90,xPrgPP90,xPrgCP90)
 # else:
 #     print("Row with data-row='26' not found.")
-
-# # Close the browser
 # driver.quit()
 
-euroTeamIds={
+#second batch of information (current ranking and average ranking)
+response2=requests.get(url2,headers=header2)
+response2.raise_for_status()
+# print("content:",response2.content)
+soup2 = BeautifulSoup(response2.content, 'html.parser')
+# print(soup2)
+ranking_element = soup2.find_all('div',class_="highlights_resultItemValue__okL7z")
+currentRanking=(ranking_element[0]).text
+avgRanking=(ranking_element[3]).text
+print(f"curr:{currentRanking},avg:{avgRanking}")
 
+#3rd batch of information (All time W/L, AvgG scored, AvgG conceeded )
+# response3=requests.get("https://www.11v11.com/teams/argentina/",headers=header3)
+# response3.raise_for_status()
+# print(response3.content.decode('utf-8'))
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    response3 = browser.new_page()
+    response3.goto('https://www.11v11.com/teams/argentina/')
+    games_won = response3.locator('tr:has-text("Games won:") td').nth(1).inner_text()
+    print(games_won)
+    browser.close()
+# rows=soup3.find_all('tr')
+# print(rows)
+# for x in rows:
+#     print(x.find('td').text)
+
+# games_won = ((soup3.find('td', text='Games won:')).find_next_sibling('td')).text
+# games_drawn = soup3.find('td', text='Games drawn:').find_next_sibling('td').text
+# games_lost = soup3.find('td', text='Games lost:').find_next_sibling('td').text
+
+
+euroTeamIds={
 }
 # copateamids={
 # 'united-states': 3505,
