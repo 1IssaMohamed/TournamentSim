@@ -1,0 +1,39 @@
+FBREF
+----------------------------------------
+tam adn opp:
+1.avg squad age
+2.xG per 90 
+3.xAg per 90
+4.progressive carries per 90
+5.progressive passes per 90
+
+age=tie breaker, older wins cause experience> 
+so:
+90pgC/15+90pgP/20+xG+xAg
+1.23+1.88+1.39+.99
+=5.49
+
+INSIDE FIFA
+----------------------------------------
+1.Current rank
+2.Average rank
+
+5/currR+3(avgR)
+.125+.129
+=.167
+11v11
+----------------------------------------
+1. all time W/L
+2. average goals scored all time
+3. average goals against all time
+
+(WL*avgS)/avgA
+(.479*1.28)/1.33
+.46
+
+so
+CAN
+5.49+.167+.46=6.117
+vs:
+4.41+5.5+1.355=11.265
+=.35% chance canda wins! not a bad calc!
