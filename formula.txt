@@ -23,11 +23,12 @@ INSIDE FIFA
 =.167
 11v11
 ----------------------------------------
-1. all time W/L
-2. average goals scored all time
-3. average goals against all time
+1.Wins from last X games
+2.Losess from last X games
+3.Draws from last Xgames
 
-(WL*avgS)/avgA
+W*3+L*0+D=points/Xgames=form
+
 (.479*1.28)/1.33
 .46
 
