@@ -112,7 +112,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 import time
-from playwright.sync_api import sync_playwright
 
 copateamids={
     'argentina':['f9fddd6e','ARG'],
@@ -141,19 +140,23 @@ id1=id1[0]
 id2=(copateamids.get(t1))[1]
 url=f"https://fbref.com/en/squads/{id1}/{t1}-Men-Stats#all_stats_standard"
 url2=f"https://inside.fifa.com/fifa-world-ranking/{id2}?gender=men"
-url3=f"https://www.11v11.com/teams/{t1.lower()}/"
+url3=f"https://www.11v11.com/teams/{t1.lower()}"
 header2 = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
 }
 header3={
     'User-Agent':"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0" ,
-    "Referer": "https://www.11v11.com/teams/argentina/"
+    "Referer":"https://footystats.org/world-cup"
 }
 #The main difference between using requests  vs Selenium is the fact tha selenium can actually process js 
 #I believe this page dosen work with requests because although it automatically opens up with the infomration necessaary
 #if I go to the webpage, clicking a button compeltely changes the page (which Id assume is odne thorugh js)
 
-# #first batch of information (xG,xAG,xProgressiveCarries,xProgressivePasses (all per 90))
+#first batch of information (xG,xAG,xProgressiveCarries,xProgressivePasses (all per 90))
+response1=requests.get(url,headers=header2)
+print(f"stauts{response1.raise_for_status()}")
+soup1 = BeautifulSoup(response1.content, 'html.parser')
+print(soup1.prettify())
 # driver = webdriver.Firefox() 
 # driver.get(url)
 # #wait for complete load
@@ -175,7 +178,7 @@ header3={
 
 #second batch of information (current ranking and average ranking)
 response2=requests.get(url2,headers=header2)
-response2.raise_for_status()
+print(f"stauts{response2.raise_for_status()}")
 # print("content:",response2.content)
 soup2 = BeautifulSoup(response2.content, 'html.parser')
 # print(soup2)
@@ -185,25 +188,34 @@ avgRanking=(ranking_element[3]).text
 print(f"curr:{currentRanking},avg:{avgRanking}")
 
 #3rd batch of information (All time W/L, AvgG scored, AvgG conceeded )
-# response3=requests.get("https://www.11v11.com/teams/argentina/",headers=header3)
-# response3.raise_for_status()
-# print(response3.content.decode('utf-8'))
-with sync_playwright() as p:
-    browser = p.chromium.launch(headless=True)
-    response3 = browser.new_page()
-    response3.goto('https://www.11v11.com/teams/argentina/')
-    games_won = response3.locator('tr:has-text("Games won:") td').nth(1).inner_text()
-    print(games_won)
-    browser.close()
-# rows=soup3.find_all('tr')
-# print(rows)
-# for x in rows:
-#     print(x.find('td').text)
+# response3=requests.get("https://www.footballdatabase.eu/en/club/team/455-argentine/2024#clubFixtures",headers=header2)
+# soup3=BeautifulSoup(response3.text,'html.parser')
+# print(response3.raise_for_status())
+# print(response3.content)
+# club_balance_section = soup3.find('div', class_='module club_balance')
+# rows = club_balance_section.find_all('tr', class_='line')
+# last_row = rows[-1]
+# record=[int(x.text) for x in last_row]
+# print(record) 
+# winPoints=record[1]*3
+# drawPoints=record[2]
+# #how many points have they been getting per game from the last 10 games
+# form=(winPoints+drawPoints)/10
+# print(form)
 
-# games_won = ((soup3.find('td', text='Games won:')).find_next_sibling('td')).text
-# games_drawn = soup3.find('td', text='Games drawn:').find_next_sibling('td').text
-# games_lost = soup3.find('td', text='Games lost:').find_next_sibling('td').text
+# for x in last_row:
+#     print(x.text)
 
+
+
+# print(response3.content.decode("utf-8"))
+# print(response3.content)
+
+# with sync_playwright() as p:
+#     # Launch the browser
+#     browser = p.chromium.launch(headless=False)  # Run in headful mode for debugging
+#     page = browser.new_page()
+#     page.goto("https://footystats.org/clubs/argentina-national-team-8625")
 
 euroTeamIds={
 }
