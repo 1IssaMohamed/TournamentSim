@@ -114,39 +114,41 @@ from bs4 import BeautifulSoup
 import time
 
 copateamids={
-    'argentina':['f9fddd6e','ARG'],
-    'Bolivia':0,
-    'Brazil':0,
-    'chile':0,
-    'colombia':0,
-    'ecuador':0,
-    'Paraguay':0,
-    'peru':0,
-    'urugay':0,
-    'venezula':0,
-    'Canada':0,
-    'Costa-Rica':0,
-    'Haitit':0,
-    "honduras":0,
-    'Jamaica':0,
-    'Mexico':0,
-    'Panama':0,
-    'Uniuted-States':0
+    'Argentina':['f9fddd6e','ARG',''],
+    'Bolivia':['1bd2760c','BOL'],
+    'Brazil':['304635c3','BRA'],
+    'Chile':['7fd9c2a2','CHI'],
+    'Colombia':['ab73cfe5','COL'],
+    'Ecuador':['123acaf8','ECU'],
+    'Paraguay':['d2043442','PAR'],
+    'Peru':['f711c854','PER'],
+    'Uruguay':['870e020f','URU'],
+    'Venezula':['df384984','VEN'],
+    'Canada':['9c6d90a0','CAN'],
+    'Costa-Rica':['1ea5ab66','CRC'],
+    'Jamaica':['189bdbbd','JAM'],
+    'Mexico':['b009a548','MEX'],
+    'Panama':['6061a82d','PAN'],
+    'United-States':['0f66725b','USA']
     }
 t1=input("what is team 1?")
+t1=t1.strip()
+t1=t1.title()
+t1=t1.replace(" ","-")
+id11=(copateamids.get(t1))
+id11=id11[0]
+id12=(copateamids.get(t1))[1]
+id13=(copateamids.get(t1))[2]
 t2=input("What is team 2?")
-id1=(copateamids.get(t1))
-id1=id1[0]
-id2=(copateamids.get(t1))[1]
-url=f"https://fbref.com/en/squads/{id1}/{t1}-Men-Stats#all_stats_standard"
-url2=f"https://inside.fifa.com/fifa-world-ranking/{id2}?gender=men"
+t2=t2.strip()
+t2=t2.title()
+t2=t2.replace(" ","-")
+
+url=f"https://fbref.com/en/squads/{id11}/{t1}-Men-Stats#all_stats_standard"
+url2=f"https://inside.fifa.com/fifa-world-ranking/{id12}?gender=men"
 url3=f"https://www.11v11.com/teams/{t1.lower()}"
 header2 = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-}
-header3={
-    'User-Agent':"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0" ,
-    "Referer":"https://footystats.org/world-cup"
 }
 #The main difference between using requests  vs Selenium is the fact tha selenium can actually process js 
 #I believe this page dosen work with requests because although it automatically opens up with the infomration necessaary
@@ -156,26 +158,17 @@ header3={
 response1=requests.get(url,headers=header2)
 print(f"stauts{response1.raise_for_status()}")
 soup1 = BeautifulSoup(response1.content, 'html.parser')
-print(soup1.prettify())
-# driver = webdriver.Firefox() 
-# driver.get(url)
-# #wait for complete load
-# time.sleep(5)
-# page_source = driver.page_source
-# soup = BeautifulSoup(page_source, 'html.parser')
-# # Locate the specific row with data-row="26"
-# row = soup.find('tr', attrs={'data-row': '26'})
-# if row:
-#     data = [td.get_text(strip=True) for td in row.find_all('td')]
-#     xGP90=data[26]
-#     xAGP90=data[27]
-#     xPrgCP90=data[18]
-#     xPrgPP90=data[19]
-#     print(xGP90,xAGP90,xPrgPP90,xPrgCP90)
-# else:
-#     print("Row with data-row='26' not found.")
-# driver.quit()
-
+footer=soup1.find("tfoot")
+# could do find_all here and also utilize the opponent stats
+row=footer.find("tr")
+data = [td.get_text(strip=True) for td in row.find_all('td')]
+xGP90=float(data[26])
+xAGP90=float(data[27])
+xPrgCP90=float(data[18])
+xPrgPP90=float(data[19])
+print(xGP90,xAGP90,xPrgPP90,xPrgCP90)
+teamQuality=(xPrgCP90/100)+(xPrgPP90/150)+xGP90+xAGP90
+print(teamQuality)
 #second batch of information (current ranking and average ranking)
 response2=requests.get(url2,headers=header2)
 print(f"stauts{response2.raise_for_status()}")
@@ -183,196 +176,42 @@ print(f"stauts{response2.raise_for_status()}")
 soup2 = BeautifulSoup(response2.content, 'html.parser')
 # print(soup2)
 ranking_element = soup2.find_all('div',class_="highlights_resultItemValue__okL7z")
-currentRanking=(ranking_element[0]).text
-avgRanking=(ranking_element[3]).text
+currentRankingString=(ranking_element[0]).text
+avgRankingString=(ranking_element[3]).text
+currentRanking=""
+avgRanking=""
+for char in currentRankingString:
+    if char.isdigit():
+        currentRanking+=char
+for char in avgRankingString:
+    if char.isdigit():
+        avgRanking+=char
+currentRanking=float(currentRanking)
+avgRanking=float(avgRanking)
 print(f"curr:{currentRanking},avg:{avgRanking}")
+rankRating=5/currentRanking+3/avgRanking
 
 #3rd batch of information (All time W/L, AvgG scored, AvgG conceeded )
-# response3=requests.get("https://www.footballdatabase.eu/en/club/team/455-argentine/2024#clubFixtures",headers=header2)
-# soup3=BeautifulSoup(response3.text,'html.parser')
+# If this is messed up, go with this alternative, https://fbref.com/en/squads/1ea5ab66/history/Costa-Rica-Men-Stats-and-History#all_nat_tm_summary
+response3=requests.get("https://www.footballdatabase.eu/en/club/team/455-argentine/2024#clubFixtures",headers=header2)
+soup3=BeautifulSoup(response3.text,'html.parser')
 # print(response3.raise_for_status())
 # print(response3.content)
-# club_balance_section = soup3.find('div', class_='module club_balance')
-# rows = club_balance_section.find_all('tr', class_='line')
-# last_row = rows[-1]
-# record=[int(x.text) for x in last_row]
-# print(record) 
-# winPoints=record[1]*3
-# drawPoints=record[2]
-# #how many points have they been getting per game from the last 10 games
-# form=(winPoints+drawPoints)/10
-# print(form)
+club_balance_section = soup3.find('div', class_='module club_balance')
+rows = club_balance_section.find_all('tr', class_='line')
+last_row = rows[-1]
+record=[int(x.text) for x in last_row]
+print(record) 
+winPoints=record[1]*3
+drawPoints=record[2]
+#how many points have they been getting per game from the last 10 games
+form=(winPoints+drawPoints)/10
+print(form)
 
-# for x in last_row:
-#     print(x.text)
+print(f"final: {form}+{rankRating}+{teamQuality}")
+totalScore=form+rankRating+teamQuality
+print(totalScore)
 
-
-
-# print(response3.content.decode("utf-8"))
-# print(response3.content)
-
-# with sync_playwright() as p:
-#     # Launch the browser
-#     browser = p.chromium.launch(headless=False)  # Run in headful mode for debugging
-#     page = browser.new_page()
-#     page.goto("https://footystats.org/clubs/argentina-national-team-8625")
-
-euroTeamIds={
-}
-# copateamids={
-# 'united-states': 3505,
-# 'mexico': 6303,
-# 'canada': 2316,
-# 'costa-rica': 4563,
-# 'honduras': 4564,
-# 'el-salvador': 4565,
-# 'jamaica': 3671,
-# 'panama': 4567,
-# 'trinidad-and-tobago': 4568,
-# 'guatemala': 4569,
-# 'haiti': 4570,
-# 'nicaragua': 4571,
-# 'cuba': 4572,
-# 'suriname': 7936,
-# 'curaçao': 7717,
-# 'antigua-and-barbuda': 4574,
-# 'saint-kitts-and-nevis': 4575,
-# 'grenada': 4576,
-# 'saint-vincent-and-the-grenadines': 4577,
-# 'saint-lucia': 4578,
-# 'dominica': 4579,
-# 'barbados': 4580,
-# 'belize': 4581,
-# 'bermuda': 4582,
-# 'guyana': 4583,
-# 'montserrat': 4584,
-# 'bahamas': 4585,
-# 'aruba': 7632,
-# 'cayman-islands': 4586,
-# 'turks-and-caicos-islands': 4587,
-# 'british-virgin-islands': 4588,
-# 'us-virgin-islands': 4589,
-# 'anguilla': 4590,
-# 'brazil': 3439,
-# 'argentina': 3437,
-# 'uruguay': 3449,
-# 'colombia': 3442,
-# 'chile': 3440,
-# 'peru': 3436,
-# 'venezuela': 3448,
-# 'paraguay': 3447,
-# 'ecuador': 3441,
-# 'bolivia': 3437,
-# }
-
-# euroTeamIds={
-# 'albania': 3502,
-# 'andorra': 6168,
-# 'armenia': 3814,
-# 'austria': 3388,
-# 'azerbaijan': 3815,
-# 'belarus': 3816,
-# 'belgium': 3382,
-# 'bosnia-herzegovina': 3501,
-# 'bulgaria': 3389,
-# 'croatia': 3556,
-# 'cyprus': 5594,
-# 'czech-republic': 3445,
-# 'denmark': 3434,
-# 'england': 3299,
-# 'estonia': 5783,
-# 'faroe-islands': 6088,
-# 'finland': 3570,
-# 'france': 3377,
-# 'georgia': 3833,
-# 'germany': 3262,
-# 'gibraltar': 16154,
-# 'greece': 3379,
-# 'hungary': 3698,
-# 'iceland': 6714,
-# 'ireland': 3515,
-# 'italy': 3376,
-# 'kazakhstan': 3838,
-# 'kosovo': 15488,
-# 'latvia': 3821,
-# 'liechtenstein': 3817,
-# 'lithuania': 3834,
-# 'luxembourg': 3845,
-# 'malta': 3853,
-# 'moldova': 3832,
-# 'monaco': 16223,
-# 'montenegro': 10750,
-# 'netherlands': 3378,
-# 'north-macedonia': 3557,
-# 'norway': 3516,
-# 'poland': 3444,
-# 'portugal': 3300,
-# 'romania': 3446,
-# 'russia': 3443,
-# 'san-marino': 3836,
-# 'scotland': 3708,
-# 'serbia': 3435,
-# 'slovakia': 3803,
-# 'slovenia': 3671,
-# 'spain': 3375,
-# 'sweden': 3554,
-# 'switzerland': 3555,
-# 'turkey': 3433,
-# 'ukraine': 3707,
-# 'wales': 3575,
-# }
-# id=euroTeamIds.get(realTeamName)
-# searchingUrl=f"https://www.transfermarkt.us/{realTeamName}/legionaere/verein/{id}"
-# headers = {
-#     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-    
-# }
-# response=requests.get(searchingUrl,headers=headers)
-# response.raise_for_status()
-# # print("content:",response.content)
-# soup = BeautifulSoup(response.content, 'html.parser')
-# print(soup)
-# ranking_element = soup.find(class_='team_ranking_class')
-# if ranking_element:
-#     ranking = ranking_element.text.strip()
-#     print(f"Team Ranking: {ranking}")
-# else:
-#     print("DNE!")
-
-# market_value = soup.find(class_='market_value_class')
-# if market_value:
-#     market_value = market_value.text.strip()
-# else:
-#     print("DNE!!")
-# print(f"{realTeamName} market value:{market_value}")
-# trophy_count = soup.find(id='trophy_count_id')
-# if trophy_count:
-#     trophy_count = trophy_count.text.strip()
-# else:
-#     print("DNE!!!")
-
-
-# url = "https://www.transfermarkt.us/wettbewerbe/fifa"
-# headers = {
-#     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-    
-# }
-
-# response = requests.get(url, headers=headers)
-
-# if response.status_code == 200:
-#     print("Request successful!")
-#     html_content=response.content  # or response.text for a human-readable format
-# else:
-#     print(f"Error: {response.status_code}")
-# print(html_content)
-# soup = BeautifulSoup(html_content, 'html.parser')
-
-# # Example: Scraping team names
-# team_names = soup.find_all('td', class_='hauptlink')
-
-# for team in team_names:
-#     print(team.text.strip())
 figlet = pyfiglet.Figlet(font='slant')
 print(colored(figlet.renderText("Welcome to Euro/Copa Tournament simulator!"),"red",on_color="on_black",attrs=["bold"]))
 totalteams=[]
