@@ -26,16 +26,98 @@
 #     averageAge
 #     teamTrophies (heritage increases total chance of winning)
 
-
 #ok lost most of my data at home cause Ithought I comitted my work corectly but guess not? 
 import random
 import pyfiglet
 from termcolor import colored
+import requests
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
+import time
+copaTeamIds={
+    'Argentina':['f9fddd6e','ARG',''],
+    'Bolivia':['1bd2760c','BOL'],
+    'Brazil':['304635c3','BRA'],
+    'Chile':['7fd9c2a2','CHI'],
+    'Colombia':['ab73cfe5','COL'],
+    'Ecuador':['123acaf8','ECU'],
+    'Paraguay':['d2043442','PAR'],
+    'Peru':['f711c854','PER'],
+    'Uruguay':['870e020f','URU'],
+    'Venezuela':['df384984','VEN'],
+    'Canada':['9c6d90a0','CAN'],
+    'Costa-Rica':['1ea5ab66','CRC'],
+    'Jamaica':['189bdbbd','JAM'],
+    'Mexico':['b009a548','MEX'],
+    'Panama':['6061a82d','PAN'],
+    'United-States':['0f66725b','USA']
+    }
+copaTeams = ["Argentina","Bolivia","Brazil","Chile","Colombia","Ecuador","Paraguay","Peru","Uruguay","Venezuela","Mexico","United-States","Canada","Costa-Rica","Panama","Jamaica"]
+euroTeamIds = {
+    "Germany":['c1e40422',"GER"],
+    "Portugal":['4a1b4ea8',"POR"],
+    "Spain":['b561dd30',"ESP"],
+    "France":['b1b36dcd',"FRA"],
+    "Italy":['998c5958',"ITA"],
+    "Netherlands":['5bb5024a',"NED"],
+    "Belgium":['361422b9',"BEL"],
+    "Croatia":['7b08e376',"CRO"],
+    "England":['1862c019',"ENG"],
+    "Switzerland":['81021a70',"SUI"],
+    "Denmark":['29a4e4af',"DEN"],
+    "Poland":['8912dcf0',"POL"],
+    "Austria":['d5121f10',"AUT"],
+    "Turkiye":['ac6bcf92',"TUR"],
+    "Czechia":['2740937c',"CZE"],
+    "Serbia":['1d6f5c9b',"SRB"],
+    "Georgia":['7158b127',"NOR"],
+    "Ukraine":['afa29a3e',"UKR"],
+    "Scotland":['602d3994',"SCO"],
+    "Hungary":['b4ac5e97',"HUN"],
+    "Romania":['7def9493',"ROU"],
+    "Slovakia":['66cff10b',"SVK"],
+    "Slovenia":['6b9f868f',"SVN"],
+    "Albania":['b44b9eb7',"ALB"]
+}
+
+euroTeams = ["Germany","Portugal","Spain","France","Italy","Netherlands","Belgium","Croatia","England","Switzerland","Denmark","Poland","Austria","Turkiye","Czechia","Serbia","Georgia","Ukraine","Scotland","Hungary","Romania","Slovakia","Slovenia","Albania"]
 
 class Tournament:
     def __init__(self,teams):
         self.teams=teams
+    def createGroups(self):
+        random.shuffle(copaTeams)
+        self.totalGroups=[]
+        self.groupA=[copaTeams.pop()*4]
+        self.totalGroups.append(self.groupA)
+        print(f"Group A:{self.groupA}")
+        self.groupB=[copaTeams.pop()*4]
+        self.totalGroups.append(self.groupB)
+        print(f"Group B:{self.groupB}")
+        self.groupC=[copaTeams.pop()*4]
+        print(f"Group C:{self.groupC}")
+        self.totalGroups.append(self.groupC)
+        self.groupD=[copaTeams.pop()*4]        
+        print(f"Group D:{self.groupD}")
+        self.totalGroups.append(self.groupD)
+        if EuroOrCopa==1:
+                self.groupE=[copaTeams.pop()*4]        
+                print(f"Group E:{self.groupE}")
+                self.totalGroups.append(self.groupE)
+                self.groupF=[copaTeams.pop()*4]        
+                print(f"Group F:{self.groupF}")
+                self.totalGroups.append(self.groupF)
+    
+    def simulateGroup(self):
+        self.createGroups()
+        matchups=[(0,1)(0,2)(0,3)
+                  (1,2)(1,3)
+                  (2,3)]
+        for x in self.totalGroups:
 
+
+        return 0
     def simulateRound(self):
         numOfGames=int(len(self.teams)/2)
         random.shuffle(self.teams)
@@ -46,15 +128,20 @@ class Tournament:
             #popping the 2 teams that will be playing each other out
             a=self.teams.pop()
             b=self.teams.pop()
-            match=Match(a,b,"Zimbabwe","June 1, 2052")
+            if EuroOrCopa==2:
+                location=random.choice(copaTeams)
+            else:
+                location=random.choice(euroTeams)
+            match=Match(a,b,location)
             nextRound.append(match.singleResult(match.team1,match.team2))
         self.teams=nextRound
         print(f"ROUND COMPLETE!\n------------------------------------------------------------------------------------")
+        time.sleep(1)
         return self.teams
     
     def simulateKnockout(self):
         while len(self.teams)>1:
-            print(f"round {len(self.teams)} current teams is:")
+            print(f"round of {len(self.teams)} current teams are:")
             for x in self.teams:
                 print(x.nation)
             self.simulateRound()
@@ -62,192 +149,180 @@ class Tournament:
 
 
 class Team:
-    #other aspects that could go here are team age, t10 coach, last placement
-    def __init__(self, nation, rating,heritage):
+    #Would like to end up overall team rating, made up of xg,xga,xpp,xpc,form, and fifa ranking
+    #end up with teamQuality and rankRating ->lead to totalForm
+    def __init__(self, nation, id1, id2,points):
         self.nation=nation
-        self.heritage=heritage
-        if heritage>=3:
-            self.rating=(rating*.25)+rating
-        else:
-            self.rating=rating
+        # required if you go through group stage
+        self.points=0
+        url=f"https://fbref.com/en/squads/{id1}/2024/{nation}-Men-Stats#all_stats_standard"
+        url2=f"https://inside.fifa.com/fifa-world-ranking/{id2}?gender=men"
+        header2 = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+        }
+        #The main difference between using requests  vs Selenium is the fact tha selenium can actually process js I believe this page dosen work with requests because although it automatically opens up with the infomration necessaary if I go to the webpage, clicking a button compeltely changes the page (which Id assume is odne thorugh js)
+
+        #first batch of information (xG,xAG,xProgressiveCarries,xProgressivePasses (all per 90))
+        response1=requests.get(url,headers=header2)
+        soup1 = BeautifulSoup(response1.content, 'html.parser')
+        footer=soup1.find("tfoot")
+        row=footer.find("tr")
+        data = [td.get_text(strip=True) for td in row.find_all('td')]
+        print(data,len(data))
+        xGP90=float(data[26])
+        xAGP90=float(data[27])
+        xPrgCP90=float(data[18])
+        xPrgPP90=float(data[19])
+        self.teamQuality=(xPrgCP90/100)+(xPrgPP90/150)+xGP90+xAGP90
+        print(f"Team Quality:{self.teamQuality}")
+
+        #second batch of information (current ranking and average ranking)
+        response2=requests.get(url2,headers=header2)
+        soup2 = BeautifulSoup(response2.content, 'html.parser')
+        ranking_element = soup2.find_all('div',class_="highlights_resultItemValue__okL7z")
+        currentRankingString=(ranking_element[0]).text
+        avgRankingString=(ranking_element[3]).text
+        #Formatting the strings of data into usable floats for calcualtions
+        currentRanking=""
+        avgRanking=""
+        for char in currentRankingString:
+            if char.isdigit():
+                currentRanking+=char
+        for char in avgRankingString:
+            if char.isdigit():
+                avgRanking+=char
+        currentRanking=float(currentRanking)
+        avgRanking=float(avgRanking)
+        # print(f"curr:{currentRanking},avg:{avgRanking}")
+        self.rankRating=5/currentRanking+3/avgRanking
+        print(f"rank rating:{self.rankRating}")
+        self.teamRating=self.rankRating+self.teamQuality
+        print(f"final team rating: {self.teamRating}")
+    
     def getNation(self):
         return self.nation
-    def getHeritage(self):
-        return self.heritage
-    def getRating(self):
-        return self.heritage
+    
+    def getTeamQuality(self):
+        return self.teamQuality
+    
+    def getRankRating(self):
+        return self.rankRating
+    
+    def getTeamRating(self):
+        return self.teamRating
         
         
 #for euros location will be a randomly chosen european country and you get a boost if you are form that place
 #for copa it will be the same, Ill prolly get the list from chat gpt inorder to randomize
 #could also add ref later and see the referees history with each of the nations, possibly scraping through a data base 
 class Match:
-    def __init__(self,t1,t2,location, date):
+    def __init__(self,t1,t2,location):
         self.team1=t1
         self.team2=t2
         self.location=location
+        #if home field advantage, 
         if self.team1.nation==location:
-            self.team1.rating=(self.team1.rating*.25)+self.team1.rating
+            self.team1.teamRating*=.15
         if self.team2.nation==location:
-            self.team2.rating=(self.team2.rating*.25)+self.team2.rating
-        self.date=date
+            self.team2.teamRating*=.15
     
     def singleResult(self,t1,t2): 
-        totRange=self.team1.rating+self.team2.rating
+        totRange=self.team1.teamRating+self.team2.teamRating
         #remove the actual "totRange" over here late
-        print(f"{self.team1.nation} ({self.team1.rating})vs {self.team2.nation} ({self.team2.rating}) \n{totRange}")
-        result=int(random.randint(int(self.team1.rating),int(totRange)))
+        print(f"{self.team1.nation} ({self.team1.teamRating})vs {self.team2.nation} ({self.team2.teamRating}) \n{totRange}")
+        result=(random.uniform(self.team1.teamRating,totRange))
         print(result)
-        if result<=self.team1.rating:
+        if result<=self.team1.teamRating:
             print(f"{self.team1.nation} wins!")
             return self.team1
         else:
             print(f"{self.team2.nation} wins!")
             return self.team2
+        time.sleep(1)
 
-
-#requests
-import requests
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from bs4 import BeautifulSoup
-import time
-
-copateamids={
-    'Argentina':['f9fddd6e','ARG',''],
-    'Bolivia':['1bd2760c','BOL'],
-    'Brazil':['304635c3','BRA'],
-    'Chile':['7fd9c2a2','CHI'],
-    'Colombia':['ab73cfe5','COL'],
-    'Ecuador':['123acaf8','ECU'],
-    'Paraguay':['d2043442','PAR'],
-    'Peru':['f711c854','PER'],
-    'Uruguay':['870e020f','URU'],
-    'Venezula':['df384984','VEN'],
-    'Canada':['9c6d90a0','CAN'],
-    'Costa-Rica':['1ea5ab66','CRC'],
-    'Jamaica':['189bdbbd','JAM'],
-    'Mexico':['b009a548','MEX'],
-    'Panama':['6061a82d','PAN'],
-    'United-States':['0f66725b','USA']
-    }
-t1=input("what is team 1?")
-t1=t1.strip()
-t1=t1.title()
-t1=t1.replace(" ","-")
-id11=(copateamids.get(t1))
-id11=id11[0]
-id12=(copateamids.get(t1))[1]
-id13=(copateamids.get(t1))[2]
-t2=input("What is team 2?")
-t2=t2.strip()
-t2=t2.title()
-t2=t2.replace(" ","-")
-
-url=f"https://fbref.com/en/squads/{id11}/{t1}-Men-Stats#all_stats_standard"
-url2=f"https://inside.fifa.com/fifa-world-ranking/{id12}?gender=men"
-url3=f"https://www.11v11.com/teams/{t1.lower()}"
-header2 = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
-}
-#The main difference between using requests  vs Selenium is the fact tha selenium can actually process js 
-#I believe this page dosen work with requests because although it automatically opens up with the infomration necessaary
-#if I go to the webpage, clicking a button compeltely changes the page (which Id assume is odne thorugh js)
-
-#first batch of information (xG,xAG,xProgressiveCarries,xProgressivePasses (all per 90))
-response1=requests.get(url,headers=header2)
-print(f"stauts{response1.raise_for_status()}")
-soup1 = BeautifulSoup(response1.content, 'html.parser')
-footer=soup1.find("tfoot")
-# could do find_all here and also utilize the opponent stats
-row=footer.find("tr")
-data = [td.get_text(strip=True) for td in row.find_all('td')]
-xGP90=float(data[26])
-xAGP90=float(data[27])
-xPrgCP90=float(data[18])
-xPrgPP90=float(data[19])
-print(xGP90,xAGP90,xPrgPP90,xPrgCP90)
-teamQuality=(xPrgCP90/100)+(xPrgPP90/150)+xGP90+xAGP90
-print(teamQuality)
-#second batch of information (current ranking and average ranking)
-response2=requests.get(url2,headers=header2)
-print(f"stauts{response2.raise_for_status()}")
-# print("content:",response2.content)
-soup2 = BeautifulSoup(response2.content, 'html.parser')
-# print(soup2)
-ranking_element = soup2.find_all('div',class_="highlights_resultItemValue__okL7z")
-currentRankingString=(ranking_element[0]).text
-avgRankingString=(ranking_element[3]).text
-currentRanking=""
-avgRanking=""
-for char in currentRankingString:
-    if char.isdigit():
-        currentRanking+=char
-for char in avgRankingString:
-    if char.isdigit():
-        avgRanking+=char
-currentRanking=float(currentRanking)
-avgRanking=float(avgRanking)
-print(f"curr:{currentRanking},avg:{avgRanking}")
-rankRating=5/currentRanking+3/avgRanking
 
 #3rd batch of information (All time W/L, AvgG scored, AvgG conceeded )
 # If this is messed up, go with this alternative, https://fbref.com/en/squads/1ea5ab66/history/Costa-Rica-Men-Stats-and-History#all_nat_tm_summary
-response3=requests.get("https://www.footballdatabase.eu/en/club/team/455-argentine/2024#clubFixtures",headers=header2)
-soup3=BeautifulSoup(response3.text,'html.parser')
-# print(response3.raise_for_status())
-# print(response3.content)
-club_balance_section = soup3.find('div', class_='module club_balance')
-rows = club_balance_section.find_all('tr', class_='line')
-last_row = rows[-1]
-record=[int(x.text) for x in last_row]
-print(record) 
-winPoints=record[1]*3
-drawPoints=record[2]
-#how many points have they been getting per game from the last 10 games
-form=(winPoints+drawPoints)/10
-print(form)
+# response3=requests.get("https://footystats.org/clubs/canada-national-team-8655",headers=header2)
+# print(response3)
+# soup3=BeautifulSoup(response3.text,"html.parser")
+# print(soup3.prettify)
+# print(soup3.prettify)
+# table=soup3.find_all("tbody")
+# for x in table:
+#     print(f"big body benz:{x}")
 
-print(f"final: {form}+{rankRating}+{teamQuality}")
-totalScore=form+rankRating+teamQuality
-print(totalScore)
+# table=soup3.find_all('table')
+# # print(table)
+# print('kallabunga dude')
+# for x in table:
+#     print(f"112313:{x}")
+#     allTables=x.find_all("tr",class_="rowSum")
+#     print(f"table123:{allTables}")
+
+# row=table.find('tr',{'data-row':'0'})
+
+
+
+# response3=requests.get("https://www.footballdatabase.eu/en/club/team/455-argentine/2024#clubFixtures",headers=header2)
+# soup3=BeautifulSoup(response3.text,'html.parser')
+# # print(response3.raise_for_status())
+# # print(response3.content)
+# club_balance_section = soup3.find('div', class_='module club_balance')
+# rows = club_balance_section.find_all('tr', class_='line')
+# last_row = rows[-1]
+# record=[int(x.text) for x in last_row]
+# print(record) 
+# winPoints=record[1]*3
+# drawPoints=record[2]
+# #how many points have they been getting per game from the last 10 games
+# form=(winPoints+drawPoints)/10
+# print(form)
+
+# print(f"final: {form}+{rankRating}+{teamQuality}")
+# totalScore=form+rankRating+teamQuality
+# print(totalScore)
 
 figlet = pyfiglet.Figlet(font='slant')
 print(colored(figlet.renderText("Welcome to Euro/Copa Tournament simulator!"),"red",on_color="on_black",attrs=["bold"]))
 totalteams=[]
 
-t=int(input("Would you like to simulate\n1.euros\n2.copa america?\n"))
-while t!=1 or t!=2:
-    t=int(input("invalid input, try again!\n"))
-numOfTeams=int(input("how many teams would you like in this tournament\n1.8\n2.16\n3.32\n"))
-while numOfTeams<1 or numOfTeams>3:
-    numOfTeams=int(input("invalid input, try again\n"))
-if numOfTeams==1:
-    numOfTeams=8
-elif numOfTeams==2:
+EuroOrCopa=int(input("Would you like to simulate\n1.euros\n2.copa america?\n"))
+while EuroOrCopa!=1 and EuroOrCopa!=2:
+    EuroOrCopa=int(input("invalid input, try again!\n"))
+if EuroOrCopa==1:
+    ManualOrAutomatic=int(input("Would you like to \n1.Manually choose the 16 teams in the knockout stage\n2.Automatically run the tournament from scratch\n"))
     numOfTeams=16
-elif numOfTeams==3:
-    numOfTeams=32
-
-#create 2 gloabal lists for the countries in south and north america and for the countries in europe
-rankingSeen=[]
-nationsSeen=[]
-for x in range(numOfTeams):
-    #check if not in country list 
-    n=input(f"Nation #{x+1}?")
-    while n in nationsSeen:
-        n= int(input("The same team cant get placed 2 times in the same tournament!\n, retry"))
-    nationsSeen.append(n)
-    #make sure valid input
-    r=int(input("what is the current team ranking 1-211"))
-    while r in rankingSeen or r>211 or r<1:
-        r= int(input("invalid input, retry\n, retry"))
-    rankingSeen.append(r)
-    r=(211-r)
-    h=int(input("How many major trophies has your nation won in its history?"))
+    regionTeams=euroTeams
+    regionIds=euroTeamIds
+else:
+    ManualOrAutomatic=int(input("Would you like to \n1.Manually choose the 8 teams in the knockout stage\n2.Automatically run the tournament from scratch\n"))
+    numOfTeams=8
+    regionTeams=copaTeams
+    regionIds=copaTeamIds
 
     
-    totalteams.append(Team(n,r,h))
-
-sim= Tournament(totalteams)
-print(f"and the champion isssss...\n{sim.simulateKnockout().nation}!!!!!")
+if ManualOrAutomatic==1:
+    nationsSeen=[]
+    finalTeamList=[]
+    for x in range(numOfTeams):
+        #check if not in country list 
+        n=input(f"Nation #{x+1}?\n")
+        n=n.strip()
+        n=n.title()
+        n=n.replace(" ","-")
+        print(n)
+        while n in nationsSeen or n not in regionTeams:
+            n= input("Invalid entry,\nretry")
+            n=n.strip()
+            n=n.title()
+            n=n.replace(" ","-")
+        nationsSeen.append(n)
+        id1=(regionIds.get(n))
+        id1=id1[0]
+        id2=(regionIds.get(n))[1]
+        finalTeamList.append(Team(n,id1,id2))
+    sim= Tournament(finalTeamList)
+    for x in finalTeamList:
+        print(x.nation)
+    print(f"and the champion isssss...\n{sim.simulateKnockout().nation}!!!!!")
