@@ -71,7 +71,7 @@ euroTeamIds = {
     "Turkiye":['ac6bcf92',"TUR"],
     "Czechia":['2740937c',"CZE"],
     "Serbia":['1d6f5c9b',"SRB"],
-    "Georgia":['7158b127',"NOR"],
+    "Georgia":['7158b127',"GEO"],
     "Ukraine":['afa29a3e',"UKR"],
     "Scotland":['602d3994',"SCO"],
     "Hungary":['b4ac5e97',"HUN"],
@@ -86,38 +86,44 @@ euroTeams = ["Germany","Portugal","Spain","France","Italy","Netherlands","Belgiu
 class Tournament:
     def __init__(self,teams):
         self.teams=teams
+        
     def createGroups(self):
-        random.shuffle(copaTeams)
+        random.shuffle(self.teams)
         self.totalGroups=[]
-        self.groupA=[copaTeams.pop()*4]
+        self.groupA=[self.teams.pop(),self.teams.pop(),self.teams.pop(),self.teams.pop()]
         self.totalGroups.append(self.groupA)
-        print(f"Group A:{self.groupA}")
-        self.groupB=[copaTeams.pop()*4]
+        self.groupB=[self.teams.pop(),self.teams.pop(),self.teams.pop(),self.teams.pop()]
         self.totalGroups.append(self.groupB)
-        print(f"Group B:{self.groupB}")
-        self.groupC=[copaTeams.pop()*4]
-        print(f"Group C:{self.groupC}")
+        self.groupC=[self.teams.pop(),self.teams.pop(),self.teams.pop(),self.teams.pop()]
         self.totalGroups.append(self.groupC)
-        self.groupD=[copaTeams.pop()*4]        
-        print(f"Group D:{self.groupD}")
+        self.groupD=[self.teams.pop(),self.teams.pop(),self.teams.pop(),self.teams.pop()]
         self.totalGroups.append(self.groupD)
         if EuroOrCopa==1:
-                self.groupE=[copaTeams.pop()*4]        
-                print(f"Group E:{self.groupE}")
+                self.groupE=[self.teams.pop(),self.teams.pop(),self.teams.pop(),self.teams.pop()]
                 self.totalGroups.append(self.groupE)
-                self.groupF=[copaTeams.pop()*4]        
-                print(f"Group F:{self.groupF}")
+                self.groupF=[self.teams.pop(),self.teams.pop(),self.teams.pop(),self.teams.pop()]
                 self.totalGroups.append(self.groupF)
     
-    def simulateGroup(self):
+    def simulateGroups(self):
         self.createGroups()
-        matchups=[(0,1)(0,2)(0,3)
-                  (1,2)(1,3)
-                  (2,3)]
-        for x in self.totalGroups:
-
-
+        print("starting group stage!!!")
+        for num , group in enumerate(self.totalGroups):
+            print(f"group:{chr(num+97).upper}{group[0].nation}{group[1].nation}{group[2].nation}{group[3].nation}")
+            matchups=[[group[0],group[1]],[group[0],group[2]],[group[0],group[3]],[group[1],group[2]],[group[1],group[3]],[group[2],group[3]]]
+            for teams in matchups:
+                 one=teams[0]
+                 two=teams[1]
+                 location=random.choice(regionTeams)
+                 match=Match(one,two,location)
+                 winner=match.singleResult()
+                 winner.points+=3
+                 time.sleep(1)
+            print("final group standings:")
+            group=sorted(group,key=lambda team:team.points)
+            for x in group:
+                print(x.nation,x.points)
         return 0
+    
     def simulateRound(self):
         numOfGames=int(len(self.teams)/2)
         random.shuffle(self.teams)
@@ -128,12 +134,9 @@ class Tournament:
             #popping the 2 teams that will be playing each other out
             a=self.teams.pop()
             b=self.teams.pop()
-            if EuroOrCopa==2:
-                location=random.choice(copaTeams)
-            else:
-                location=random.choice(euroTeams)
+            location=random.choice(regionTeams)
             match=Match(a,b,location)
-            nextRound.append(match.singleResult(match.team1,match.team2))
+            nextRound.append(match.singleResult())
         self.teams=nextRound
         print(f"ROUND COMPLETE!\n------------------------------------------------------------------------------------")
         time.sleep(1)
@@ -153,6 +156,7 @@ class Team:
     #end up with teamQuality and rankRating ->lead to totalForm
     def __init__(self, nation, id1, id2,points):
         self.nation=nation
+        print(nation)
         # required if you go through group stage
         self.points=0
         url=f"https://fbref.com/en/squads/{id1}/2024/{nation}-Men-Stats#all_stats_standard"
@@ -226,7 +230,7 @@ class Match:
         if self.team2.nation==location:
             self.team2.teamRating*=.15
     
-    def singleResult(self,t1,t2): 
+    def singleResult(self): 
         totRange=self.team1.teamRating+self.team2.teamRating
         #remove the actual "totRange" over here late
         print(f"{self.team1.nation} ({self.team1.teamRating})vs {self.team2.nation} ({self.team2.teamRating}) \n{totRange}")
@@ -238,7 +242,6 @@ class Match:
         else:
             print(f"{self.team2.nation} wins!")
             return self.team2
-        time.sleep(1)
 
 
 #3rd batch of information (All time W/L, AvgG scored, AvgG conceeded )
@@ -321,8 +324,15 @@ if ManualOrAutomatic==1:
         id1=(regionIds.get(n))
         id1=id1[0]
         id2=(regionIds.get(n))[1]
-        finalTeamList.append(Team(n,id1,id2))
-    sim= Tournament(finalTeamList)
-    for x in finalTeamList:
-        print(x.nation)
-    print(f"and the champion isssss...\n{sim.simulateKnockout().nation}!!!!!")
+        finalTeamList.append(Team(n,id1,id2,0))
+        sim= Tournament(finalTeamList)
+        for x in finalTeamList:
+            print(x.nation)
+        print(f"and the champion isssss...\n{sim.simulateKnockout().nation}!!!!!")
+else:
+    finalTeamList=[]
+    for x in regionTeams:
+        finalTeamList.append(Team(x,(regionIds.get(x))[0],(regionIds.get(x))[1],0))
+        time.sleep(3)
+    sim=Tournament(finalTeamList)
+    print("Starting group stage:", sim.simulateGroups())
