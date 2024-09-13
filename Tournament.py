@@ -103,13 +103,26 @@ class Tournament:
                 self.totalGroups.append(self.groupE)
                 self.groupF=[self.teams.pop(),self.teams.pop(),self.teams.pop(),self.teams.pop()]
                 self.totalGroups.append(self.groupF)
+        g='A'
+        figlet = pyfiglet.Figlet(font='standard')
+        print(colored(figlet.renderText("Group Stage:"),"white",on_color="on_black",attrs=["bold"]))
+        for x in self.totalGroups:
+            print(f"Group {g}\n---------------------------")
+            g=chr(ord(g)+1)
+            for team in x:
+                print(team.nation)
+            print("\n\n")
+        time.sleep(5)                
     
     def simulateGroups(self):
         self.createGroups()
-        print("starting group stage!!!")
-        for num , group in enumerate(self.totalGroups):
-            print(f"group:{chr(num+97).upper}{group[0].nation}{group[1].nation}{group[2].nation}{group[3].nation}")
+        nextRound=[]
+        g='A'
+        for group in self.totalGroups:
+            print(f"Group:{g}\n{group[0].nation},{group[1].nation},{group[2].nation},{group[3].nation} Matches Begin!")
+            g=chr(ord(g)+1)
             matchups=[[group[0],group[1]],[group[0],group[2]],[group[0],group[3]],[group[1],group[2]],[group[1],group[3]],[group[2],group[3]]]
+            random.shuffle(matchups)
             for teams in matchups:
                  one=teams[0]
                  two=teams[1]
@@ -120,16 +133,24 @@ class Tournament:
                  time.sleep(1)
             print("final group standings:")
             group=sorted(group,key=lambda team:team.points)
-            for x in group:
-                print(x.nation,x.points)
-        return 0
+            for t in group:
+                print(f"{t.nation}:{t.points}")
+            print(f"{group[-1].nation} and {group[-2].nation} move on to the knockout stages!\n-------------------------------------------\n")
+            nextRound.append(group[-1])
+            nextRound.append(group[-2])
+        self.teams=nextRound
+        print("\n-------------------------------------------")
+        return self.simulateKnockout()
     
     def simulateRound(self):
         numOfGames=int(len(self.teams)/2)
         random.shuffle(self.teams)
         nextRound=[]
         for x in range(numOfGames):
-            print(f"Game #{x+1}")
+            if numOfGames==1:
+                pass
+            else:
+                print(f"Game #{x+1}")
             #temporary location that has to change
             #popping the 2 teams that will be playing each other out
             a=self.teams.pop()
@@ -138,16 +159,24 @@ class Tournament:
             match=Match(a,b,location)
             nextRound.append(match.singleResult())
         self.teams=nextRound
-        print(f"ROUND COMPLETE!\n------------------------------------------------------------------------------------")
+        if numOfGames==1:
+            pass
+        else:
+            print(f"ROUND COMPLETE!\n------------------------------------------------------------------------------------")
         time.sleep(1)
         return self.teams
     
     def simulateKnockout(self):
+        print("Knockouts begin!")
         while len(self.teams)>1:
-            print(f"round of {len(self.teams)} current teams are:")
-            for x in self.teams:
-                print(x.nation)
+            if len(self.teams)==2:
+                print("FINALE!")
+            else:
+                print(f"round of {len(self.teams)} current teams are:")
+                for i,x in enumerate(self.teams):
+                    print(f"{i+1}.{x.nation}")
             self.simulateRound()
+            time.sleep(3)
         return self.teams[0]
 
 
@@ -172,13 +201,11 @@ class Team:
         footer=soup1.find("tfoot")
         row=footer.find("tr")
         data = [td.get_text(strip=True) for td in row.find_all('td')]
-        print(data,len(data))
         xGP90=float(data[26])
         xAGP90=float(data[27])
         xPrgCP90=float(data[18])
         xPrgPP90=float(data[19])
         self.teamQuality=(xPrgCP90/100)+(xPrgPP90/150)+xGP90+xAGP90
-        print(f"Team Quality:{self.teamQuality}")
 
         #second batch of information (current ranking and average ranking)
         response2=requests.get(url2,headers=header2)
@@ -199,9 +226,8 @@ class Team:
         avgRanking=float(avgRanking)
         # print(f"curr:{currentRanking},avg:{avgRanking}")
         self.rankRating=5/currentRanking+3/avgRanking
-        print(f"rank rating:{self.rankRating}")
         self.teamRating=self.rankRating+self.teamQuality
-        print(f"final team rating: {self.teamRating}")
+        print(f"Team Rating: {self.teamRating}")
     
     def getNation(self):
         return self.nation
@@ -232,59 +258,14 @@ class Match:
     
     def singleResult(self): 
         totRange=self.team1.teamRating+self.team2.teamRating
-        #remove the actual "totRange" over here late
-        print(f"{self.team1.nation} ({self.team1.teamRating})vs {self.team2.nation} ({self.team2.teamRating}) \n{totRange}")
-        result=(random.uniform(self.team1.teamRating,totRange))
-        print(result)
+        print(f"{self.team1.nation} ({self.team1.teamRating}) vs {self.team2.nation} ({self.team2.teamRating}) ")
+        result=(random.uniform(0,totRange))
         if result<=self.team1.teamRating:
             print(f"{self.team1.nation} wins!")
             return self.team1
         else:
             print(f"{self.team2.nation} wins!")
             return self.team2
-
-
-#3rd batch of information (All time W/L, AvgG scored, AvgG conceeded )
-# If this is messed up, go with this alternative, https://fbref.com/en/squads/1ea5ab66/history/Costa-Rica-Men-Stats-and-History#all_nat_tm_summary
-# response3=requests.get("https://footystats.org/clubs/canada-national-team-8655",headers=header2)
-# print(response3)
-# soup3=BeautifulSoup(response3.text,"html.parser")
-# print(soup3.prettify)
-# print(soup3.prettify)
-# table=soup3.find_all("tbody")
-# for x in table:
-#     print(f"big body benz:{x}")
-
-# table=soup3.find_all('table')
-# # print(table)
-# print('kallabunga dude')
-# for x in table:
-#     print(f"112313:{x}")
-#     allTables=x.find_all("tr",class_="rowSum")
-#     print(f"table123:{allTables}")
-
-# row=table.find('tr',{'data-row':'0'})
-
-
-
-# response3=requests.get("https://www.footballdatabase.eu/en/club/team/455-argentine/2024#clubFixtures",headers=header2)
-# soup3=BeautifulSoup(response3.text,'html.parser')
-# # print(response3.raise_for_status())
-# # print(response3.content)
-# club_balance_section = soup3.find('div', class_='module club_balance')
-# rows = club_balance_section.find_all('tr', class_='line')
-# last_row = rows[-1]
-# record=[int(x.text) for x in last_row]
-# print(record) 
-# winPoints=record[1]*3
-# drawPoints=record[2]
-# #how many points have they been getting per game from the last 10 games
-# form=(winPoints+drawPoints)/10
-# print(form)
-
-# print(f"final: {form}+{rankRating}+{teamQuality}")
-# totalScore=form+rankRating+teamQuality
-# print(totalScore)
 
 figlet = pyfiglet.Figlet(font='slant')
 print(colored(figlet.renderText("Welcome to Euro/Copa Tournament simulator!"),"red",on_color="on_black",attrs=["bold"]))
@@ -308,6 +289,7 @@ else:
 if ManualOrAutomatic==1:
     nationsSeen=[]
     finalTeamList=[]
+    print("Simulating team scores:")
     for x in range(numOfTeams):
         #check if not in country list 
         n=input(f"Nation #{x+1}?\n")
@@ -328,11 +310,14 @@ if ManualOrAutomatic==1:
         sim= Tournament(finalTeamList)
         for x in finalTeamList:
             print(x.nation)
-        print(f"and the champion isssss...\n{sim.simulateKnockout().nation}!!!!!")
+        champ=sim.simulateKnockout()
+        print("And the champion is:",champ.nation.upper())
 else:
     finalTeamList=[]
+    print("Simulating team scores:")
     for x in regionTeams:
         finalTeamList.append(Team(x,(regionIds.get(x))[0],(regionIds.get(x))[1],0))
         time.sleep(3)
     sim=Tournament(finalTeamList)
-    print("Starting group stage:", sim.simulateGroups())
+    champ=sim.simulateGroups()
+    print(f"And the champions is: {champ.nation.upper()}!!!!!!!!")
