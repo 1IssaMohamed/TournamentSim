@@ -175,6 +175,7 @@ class Tournament:
                 print(f"round of {len(self.teams)} current teams are:")
                 for i,x in enumerate(self.teams):
                     print(f"{i+1}.{x.nation}")
+                    time.sleep(1)
             self.simulateRound()
             time.sleep(3)
         return self.teams[0]
@@ -296,7 +297,6 @@ if ManualOrAutomatic==1:
         n=n.strip()
         n=n.title()
         n=n.replace(" ","-")
-        print(n)
         while n in nationsSeen or n not in regionTeams:
             n= input("Invalid entry,\nretry")
             n=n.strip()
@@ -307,11 +307,9 @@ if ManualOrAutomatic==1:
         id1=id1[0]
         id2=(regionIds.get(n))[1]
         finalTeamList.append(Team(n,id1,id2,0))
-        sim= Tournament(finalTeamList)
-        for x in finalTeamList:
-            print(x.nation)
-        champ=sim.simulateKnockout()
-        print("And the champion is:",champ.nation.upper())
+    sim= Tournament(finalTeamList)
+    champ=sim.simulateKnockout()
+    print(f"And the champion is: {champ.nation.upper()}!!!!! ")
 else:
     finalTeamList=[]
     print("Simulating team scores:")
